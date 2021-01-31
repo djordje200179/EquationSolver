@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading;
 
 namespace EquationSolver {
 	internal class Program {
@@ -15,15 +12,12 @@ namespace EquationSolver {
 
 			sw.Stop();
 
-			Console.OutputEncoding = Encoding.UTF8;
-			Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("rs");
-			Console.WriteLine($"Пронађено коријена: {results.Count}");
-			Console.WriteLine($"Потрошено вријеме: {sw.Elapsed.TotalSeconds, 0:F2} секунди");
+			Console.WriteLine($"Number of roots found: {results.Count}");
+			Console.WriteLine($"Time spent: {sw.Elapsed.TotalSeconds, 0:F2} seconds");
 			Console.WriteLine("------------------");
 
 			for (var i = 0; i < results.Count; i++)
-				Console.WriteLine($"{i + 1}. коријен: {results[i], 10:F7}");
-
+				Console.WriteLine($"{i + 1}. root: {results[i], 10:F7}");
 		}
 
 		private static void Main() {

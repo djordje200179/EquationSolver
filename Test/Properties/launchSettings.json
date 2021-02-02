@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "EquationSolver": {
+    "Test": {
       "commandName": "Project"
     },
     "WSL 2": {

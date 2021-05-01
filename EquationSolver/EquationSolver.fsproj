@@ -12,4 +12,8 @@
     <PackageReference Include="FSharp.Collections.ParallelSeq" Version="1.1.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="5.0.2-beta.21102.10" />
+  </ItemGroup>
+
 </Project>

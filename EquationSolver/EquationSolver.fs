@@ -4,14 +4,12 @@ open System
 open FSharp.Collections.ParallelSeq
 
 module EquationSolver =
-    let private numOfSegments = Environment.ProcessorCount
+    let inline private AreDifferentSign (num1: double) (num2: double) =
+        Math.Sign(num1) * Math.Sign(num2) = -1
 
-    let inline private DifferentSign (num1: double) (num2: double) =
-        num1 * num2 < 0.0
-
-    let FindPairs (func: double -> double) (steps: uint64) (limits: double * double) =
+    let private FindPairs (numberOfPairs: uint64) (func: double -> double) (limits: double * double) =
         let (lowerLimit, upperLimit) = limits
-        let step = (upperLimit - lowerLimit) / double steps
+        let step = (upperLimit - lowerLimit) / double numberOfPairs
 
         let mutable previousX = lowerLimit
         let mutable previousY = func previousX
@@ -22,33 +20,40 @@ module EquationSolver =
 
                 if not(Double.IsNaN y) then
                     if y = 0.0 then
-                        yield (x - step, x + step)
-                    
-                    if DifferentSign previousY y then
+                        yield (x, x)
+                    elif AreDifferentSign previousY y then
                         yield (previousX, x)
 
                     previousX <- x
                     previousY <- y
         }
 
-    let Bisect (func: double -> double) (steps: uint64) (limits: double * double) =
+    let private Bisect (iterations: uint64) (func: double -> double) (limits: double * double) =
         let mutable (lowerLimit, upperLimit) = limits
-
-        for _ in 1UL..steps do
-            let midPoint = (lowerLimit + upperLimit) / 2.0
+        
+        let mutable iterationCount = 0UL
+        while iterationCount < iterations do
+            let midPoint = Math.ScaleB(lowerLimit + upperLimit, -1)
             
+            if midPoint = lowerLimit || midPoint = upperLimit then
+                iterationCount <- iterations
+
             let lowerPointValue = func lowerLimit
             let midPointValue = func midPoint
             let upperPointValue = func upperLimit
             
-            if DifferentSign lowerPointValue midPointValue then
+            if AreDifferentSign lowerPointValue midPointValue then
                 upperLimit <- midPoint
-            else if DifferentSign upperPointValue midPointValue then
+            else if AreDifferentSign upperPointValue midPointValue then
                 lowerLimit <- midPoint
 
-        (lowerLimit + upperLimit) / 2.0  
+            iterationCount <- iterationCount + 1UL
 
-    let FindSolutions (func: double -> double) (steps: uint64) (limits: double * double) =
+        Math.ScaleB (lowerLimit + upperLimit, -1)
+
+    let FindSolutions (iterations: uint64) (func: double -> double) (limits: double * double) =
+        let numOfSegments = Environment.ProcessorCount
+
         let (lowerLimit, upperLimit) = limits
         let step = (upperLimit - lowerLimit) / double numOfSegments
 
@@ -62,6 +67,6 @@ module EquationSolver =
             }
 
         bounds 
-        |> PSeq.map (FindPairs func steps)
+        |> PSeq.map (FindPairs iterations func)
         |> PSeq.concat
-        |> PSeq.map (Bisect func steps)
+        |> PSeq.map (Bisect iterations func)

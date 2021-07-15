@@ -12,8 +12,9 @@ let Function (x: double) =
 let main argv =
     let results = 
         (Function, (0.0, 1.0))
-        ||> EquationSolver.FindSolutions 1e-7 0.5e-15
+        ||> EquationSolver.FindSolutions 1e-7 1e-15
         |> Seq.cache
+        |> Seq.sort
 
     printfn "*************************************************"
     printfn "*          Solutions of the function             "

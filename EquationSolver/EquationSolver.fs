@@ -15,43 +15,23 @@ module EquationSolver =
     let private FindPairs (step: double) (func: double -> double) (limits: double * double) =
         let (lowerLimit, upperLimit) = limits
 
-        let mutable previousX = lowerLimit
-        let mutable previousY = func lowerLimit
+        seq { lowerLimit..step..upperLimit }
+        |> Seq.map (fun x -> x, func x)
+        |> Seq.pairwise
+        |> Seq.filter (fun ((_, y1), (_, y2)) -> y1 = 0.0 || y2 = 0.0 || DifferentSign y1 y2)
+        |> Seq.map (fun ((x1, _), (x2, _)) -> x1, x2)
 
-        let pairs = seq {
-            for x in lowerLimit..step..upperLimit do
-                let y = func x
+    let rec private Bisect (delta: double) (func: double -> double) (limits: double * double) =
+        let (lowerLimit, upperLimit) = limits
 
-                if DifferentSign previousY y then
-                    yield (previousX, x)
+        let midPoint = Average lowerLimit upperLimit
 
-                previousX <- x
-                previousY <- y
-        }
-
-        pairs
-
-    let private Bisect (delta: double) (func: double -> double) (limits: double * double) =
-        let mutable (lowerLimit, upperLimit) = limits
-
-        let mutable midPoint = Average lowerLimit upperLimit
-
-        let mutable lowerPointValue = func lowerLimit
-        let mutable upperPointValue = func upperLimit
-
-        while upperLimit - lowerLimit >= delta do
-            let midPointValue = func midPoint
-
-            if DifferentSign lowerPointValue midPointValue then
-                upperLimit <- midPoint
-                upperPointValue <- midPointValue
-            else if DifferentSign upperPointValue midPointValue then
-                lowerLimit <- midPoint
-                lowerPointValue <- midPointValue
-
-            midPoint <- Average lowerLimit upperLimit
-
-        midPoint
+        match func lowerLimit, func upperLimit, func midPoint with
+        | lowerPointValue, _, _ when lowerPointValue = 0.0 -> lowerLimit
+        | _, upperPointValue, _ when upperPointValue = 0.0 -> upperLimit
+        | lowerPointValue, _, midPointValue when DifferentSign lowerPointValue midPointValue -> (Bisect delta func) (lowerLimit, midPoint)
+        | _, upperPointValue, midPointValue when DifferentSign upperPointValue midPointValue -> (Bisect delta func) (midPoint, upperLimit)
+        | _ -> 0.0
 
     let private FindBounds (limits: double * double) =
         let numOfSegments = Environment.ProcessorCount

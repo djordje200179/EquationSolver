@@ -5,7 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="EquationSolver.fs" />
+    <Compile Include="Solver.fs" />
+    <Compile Include="Parallel.fs" />
   </ItemGroup>
 
   <ItemGroup>

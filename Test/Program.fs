@@ -21,5 +21,5 @@ printfn "*------------------------------------------------"
 printfn $"*  Elapsed time: {stopwatch.ElapsedMilliseconds} ms"
 printfn "*------------------------------------------------"
 for zero in zeroes do
-    printfn $"*  x = {zero}"
+    printfn "* %.15f" zero
 printfn "*************************************************"

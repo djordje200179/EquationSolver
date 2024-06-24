@@ -1,21 +1,25 @@
 ﻿open EquationSolver.Solver
+open EquationSolver
+open System.Diagnostics
 
-[<EntryPoint>]
-let main argv =
-    let config = {
-        Function = fun x -> sin(1.0/x)
-        Accuracy = 1e-10
-        Delta = 1e-5
-    }
+let config = {
+    Function = fun x -> sin(1.0/x)
+    Accuracy = 1e-10
+    Resolution = 1e-5
+}
 
-    printfn "*************************************************"
-    printfn "*          Solutions of the function             "
-    printfn "*------------------------------------------------"
+let stopwatch = Stopwatch.StartNew()
+
+let zeroes = 
     (-1.0, 1.0)
     |> Parallel.FindSolutions config
-    |> Seq.iteri (fun index element -> 
-        printfn $"*  {index + 1}. zero: %.15f{element}"
-    )
-    printfn "*************************************************"
+    |> Seq.toList
 
-    0
+printfn "*************************************************"
+printfn "*          Solutions of the function             "
+printfn "*------------------------------------------------"
+printfn $"*  Elapsed time: {stopwatch.ElapsedMilliseconds} ms"
+printfn "*------------------------------------------------"
+for zero in zeroes do
+    printfn $"*  x = {zero}"
+printfn "*************************************************"

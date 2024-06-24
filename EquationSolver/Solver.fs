@@ -11,10 +11,10 @@ module Solver =
 
     let inline private Average(num1: double, num2: double) = Math.ScaleB(num1 + num2, -1)
 
-    let private FindRegions (delta: double) (func: double -> double) (limits: double * double) =
+    let private FindRegions (resolution: double) (func: double -> double) (limits: double * double) =
         let (lowerLimit, upperLimit) = limits
 
-        seq { lowerLimit..delta..upperLimit }
+        seq { lowerLimit..resolution..upperLimit }
         |> Seq.map (fun x -> x, func x)
         |> Seq.pairwise
         |> Seq.filter (fun ((_, y1), (_, y2)) -> y1 = 0.0 || y2 = 0.0 || DifferentSign(y1, y2))
@@ -30,7 +30,7 @@ module Solver =
             let midPoint = Average(lowerLimit, upperLimit)
 
             if lowerLimit = midPoint || upperLimit = midPoint then
-                raise (InvalidOperationException("Stuck in a local minimum. Decrease the delta value"))
+                raise (InvalidOperationException("Stuck in a local minimum. Decrease resolution value"))
 
             FindPoint accuracy func (
                 match func midPoint with
@@ -41,11 +41,11 @@ module Solver =
 
     type Config = {
         Function: double -> double
+        Resolution: double
         Accuracy: double
-        Delta: double
     }
 
     let FindSolutions (config: Config) (limits: double * double) =
         limits
-        |> FindRegions config.Delta config.Function
+        |> FindRegions config.Resolution config.Function
         |> Seq.map  (FindPoint config.Accuracy config.Function)

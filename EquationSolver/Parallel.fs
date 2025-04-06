@@ -4,7 +4,7 @@ open Solver
 open System
 
 module Parallel =
-    let private FindDistinctLimits (limits: double * double) (parts: int) =
+    let private FindDistinctLimits limits parts =
         let (lowerLimit, upperLimit) = limits
         let step = (upperLimit - lowerLimit) / double parts
 
@@ -12,7 +12,7 @@ module Parallel =
         |> Seq.pairwise
         |> Array.ofSeq
 
-    let FindSolutions (config: Config) (limits: double * double) =
+    let FindSolutions config limits =
         FindDistinctLimits limits Environment.ProcessorCount
         |> Array.Parallel.map (fun limits -> (FindSolutions config) limits)
         |> Seq.concat

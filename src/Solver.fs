@@ -45,30 +45,12 @@ module Solver =
                 else
                     Error PossibleDiscontinuity
 
-    type Config = {
-        Function: double -> double
-        Accuracy: double
-        Resolution: double
-    }
+    let findSolutions config functionToSolve interval =
+        let limits = Interval.limits interval
+        let accuracy = Config.accuracy config
+        let resolution = Config.resolution config
 
-    let internal validate config (lowerLimit, upperLimit) =
-        if not (Double.IsFinite config.Accuracy) || config.Accuracy <= 0.0 then
-            invalidArg (nameof config.Accuracy) "Accuracy must be a positive finite number."
-
-        if not (Double.IsFinite config.Resolution) || config.Resolution <= 0.0 then
-            invalidArg (nameof config.Resolution) "Resolution must be a positive finite number."
-
-        if not (Double.IsFinite lowerLimit) || not (Double.IsFinite upperLimit) then
-            invalidArg "limits" "Limits must be finite numbers."
-
-        if lowerLimit >= upperLimit then
-            invalidArg "limits" "The lower limit must be less than the upper limit."
-
-    let findSolutions config limits =
-        validate config limits
-
-        limits
-        |> findRegions config.Resolution config.Function
+        findRegions resolution functionToSolve limits
         |> Seq.toList
-        |> List.traverseResultM (findRoot config.Accuracy config.Function)
+        |> List.traverseResultM (findRoot accuracy functionToSolve)
         |> Result.map (List.distinct >> Seq.ofList)

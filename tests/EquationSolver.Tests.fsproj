@@ -6,7 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="TestHelpers.fs" />
+    <Compile Include="DomainTests.fs" />
     <Compile Include="SolverTests.fs" />
+    <Compile Include="ParallelTests.fs" />
   </ItemGroup>
 
   <ItemGroup>

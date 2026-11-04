@@ -17,40 +17,49 @@ processors.
 
 ```fsharp
 open System
+open EquationSolver
 open EquationSolver.Solver
 
-let config = {
-    Function = fun x -> sin (1.0 / x)
-    Accuracy = 1e-10
-    Resolution = 1e-5
-}
-
-match findSolutions config (-1.0, 1.0) with
-| Ok solutions ->
-    solutions
-    |> Seq.iter (printfn "%.15f")
-| Error DidNotConverge ->
-    printfn "The requested accuracy could not be reached."
-| Error PossibleDiscontinuity ->
-    printfn "A root could not be isolated."
+match Config.create 1e-10 1e-5 with
+| Error (InvalidAccuracy value) ->
+    printfn "Invalid accuracy: %g" value
+| Error (InvalidResolution value) ->
+    printfn "Invalid resolution: %g" value
+| Ok config ->
+    match Interval.create -1.0 1.0 with
+    | Error (NonFiniteLimit value) ->
+        printfn "Invalid limit: %g" value
+    | Error (InvalidOrder (lower, upper)) ->
+        printfn "Invalid interval: %g to %g" lower upper
+    | Ok interval ->
+        match findSolutions config (fun x -> sin (1.0 / x)) interval with
+        | Ok solutions ->
+            solutions
+            |> Seq.iter (printfn "%.15f")
+        | Error DidNotConverge ->
+            printfn "The requested accuracy could not be reached."
+        | Error PossibleDiscontinuity ->
+            printfn "A root could not be isolated."
 ```
 
 Use the parallel solver for larger intervals or expensive functions:
 
 ```fsharp
 let result =
-    EquationSolver.Parallel.findSolutions config (-1.0, 1.0)
+    EquationSolver.Parallel.findSolutions config sin interval
 ```
 
 ## Configuration
 
 | Property | Description |
 | --- | --- |
-| `Function` | Function whose real roots should be found. |
 | `Accuracy` | Maximum accepted function-value error at a root. Must be positive and finite. |
 | `Resolution` | Distance between samples used to locate root regions. Must be positive and finite. |
 
-Interval limits must be finite, and the lower limit must be less than the
+`Config.create` validates these values and returns `Result<Config, ConfigError>`.
+The resulting configuration can be reused with multiple functions.
+
+`Interval.create` requires finite limits with the lower limit less than the
 upper limit.
 
 ## Behavior and limitations

@@ -7,7 +7,7 @@ open Xunit
 
 [<Fact>]
 let ``constant nonzero function has no solutions`` () =
-    let solutions = solve (fun _ -> 1.0) (-2.0, 2.0) |> expectOk
+    let solutions = solveSequentially (fun _ -> 1.0) (-2.0, 2.0) |> expectOk
 
     Assert.Empty(solutions)
 
@@ -22,7 +22,9 @@ let ``linear function has its expected solution``
     upperLimit
     =
     let expected = -intercept / slope
-    let solutions = solve (fun x -> slope * x + intercept) (lowerLimit, upperLimit) |> expectOk
+    let solutions =
+        solveSequentially (fun x -> slope * x + intercept) (lowerLimit, upperLimit)
+        |> expectOk
 
     assertSolutions [| expected |] solutions
 
@@ -34,19 +36,23 @@ let ``quadratic function finds roots on or within interval boundaries``
     lowerLimit
     upperLimit
     =
-    let solutions = solve (fun x -> x * x - 1.0) (lowerLimit, upperLimit) |> expectOk
+    let solutions =
+        solveSequentially (fun x -> x * x - 1.0) (lowerLimit, upperLimit)
+        |> expectOk
 
     assertSolutions [| -1.0; 1.0 |] solutions
 
 [<Fact>]
 let ``root outside interval is not returned`` () =
-    let solutions = solve (fun x -> x - 3.0) (-2.0, 2.0) |> expectOk
+    let solutions = solveSequentially (fun x -> x - 3.0) (-2.0, 2.0) |> expectOk
 
     Assert.Empty(solutions)
 
 [<Fact>]
 let ``multiple roots are returned in ascending order`` () =
-    let solutions = solve (fun x -> (x + 2.0) * x * (x - 2.0)) (-3.0, 3.0) |> expectOk
+    let solutions =
+        solveSequentially (fun x -> (x + 2.0) * x * (x - 2.0)) (-3.0, 3.0)
+        |> expectOk
 
     assertSolutions [| -2.0; 0.0; 2.0 |] solutions
 
@@ -55,7 +61,7 @@ let ``closely spaced roots are found when resolution separates them`` () =
     let firstRoot = 0.1
     let secondRoot = 0.105
     let solutions =
-        solve
+        solveSequentially
             (fun x -> (x - firstRoot) * (x - secondRoot))
             (0.0, 0.2)
         |> expectOk
@@ -64,14 +70,14 @@ let ``closely spaced roots are found when resolution separates them`` () =
 
 [<Fact>]
 let ``tangent root is detected when sampled exactly`` () =
-    let solutions = solve (fun x -> x * x) (-1.0, 1.0) |> expectOk
+    let solutions = solveSequentially (fun x -> x * x) (-1.0, 1.0) |> expectOk
 
     assertSolutions [| 0.0 |] solutions
 
 [<Fact>]
 let ``NaN samples are ignored`` () =
     let solutions =
-        solve
+        solveSequentially
             (fun x -> if x < 0.0 then Double.NaN else x + 1.0)
             (-1.0, 1.0)
         |> expectOk
@@ -82,7 +88,7 @@ let ``NaN samples are ignored`` () =
 let ``discontinuous function returns a structured solver error`` () =
     let result =
         findSolutions
-            config
+            validConfig
             (fun x -> 1.0 / x)
             (interval (-1.0, 1.0))
 

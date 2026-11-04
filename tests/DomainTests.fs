@@ -12,7 +12,7 @@ open Xunit
 [<InlineData(Double.PositiveInfinity)>]
 [<InlineData(Double.NegativeInfinity)>]
 let ``accuracy must be a positive finite number`` invalidAccuracy =
-    match Config.create invalidAccuracy resolution with
+    match Config.create invalidAccuracy validResolution with
     | Error(InvalidAccuracy value) when
         value = invalidAccuracy || Double.IsNaN value && Double.IsNaN invalidAccuracy ->
         ()
@@ -25,7 +25,7 @@ let ``accuracy must be a positive finite number`` invalidAccuracy =
 [<InlineData(Double.PositiveInfinity)>]
 [<InlineData(Double.NegativeInfinity)>]
 let ``resolution must be a positive finite number`` invalidResolution =
-    match Config.create accuracy invalidResolution with
+    match Config.create validAccuracy invalidResolution with
     | Error(InvalidResolution value) when
         value = invalidResolution || Double.IsNaN value && Double.IsNaN invalidResolution ->
         ()

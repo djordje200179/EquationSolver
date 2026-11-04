@@ -3,27 +3,27 @@ module EquationSolver.TestHelpers
 open EquationSolver
 open Xunit
 
-let accuracy = 1e-10
-let resolution = 1e-3
+let validAccuracy = 1e-10
+let validResolution = 1e-3
 
-let config =
-    Config.create accuracy resolution
+let validConfig =
+    Config.create validAccuracy validResolution
     |> Result.defaultWith (failwithf "Invalid test configuration: %A")
 
 let interval (lower, upper) =
     Interval.create lower upper
     |> Result.defaultWith (failwithf "Invalid test interval: %A")
 
-let solve functionToSolve limits =
+let solveSequentially functionToSolve limits =
     limits
     |> interval
-    |> Solver.findSolutions config functionToSolve
+    |> Solver.findSolutions validConfig functionToSolve
     |> Result.map Seq.toArray
 
 let solveInParallel functionToSolve limits =
     limits
     |> interval
-    |> Parallel.findSolutions config functionToSolve
+    |> Parallel.findSolutions validConfig functionToSolve
     |> Result.map Seq.toArray
 
 let expectOk result =

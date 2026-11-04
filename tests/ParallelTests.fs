@@ -8,7 +8,7 @@ open Xunit
 let ``parallel solver returns the same solutions as sequential solver`` () =
     let functionToSolve x = sin (5.0 * x)
     let limits = -Math.PI, Math.PI
-    let sequentialSolutions = solve functionToSolve limits |> expectOk
+    let sequentialSolutions = solveSequentially functionToSolve limits |> expectOk
     let parallelSolutions = solveInParallel functionToSolve limits |> expectOk
 
     assertSolutions sequentialSolutions parallelSolutions

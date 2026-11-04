@@ -14,8 +14,8 @@ module Solver =
 
     let private midpoint lower upper = Math.ScaleB(lower + upper, -1)
 
-    let private findRegions resolution functionToSolve (lowerLimit, upperLimit) =
-        seq { lowerLimit..resolution..upperLimit }
+    let private findRegions functionToSolve points =
+        points
         |> Seq.map (fun point -> point, functionToSolve point)
         |> Seq.pairwise
         |> Seq.choose (fun ((firstPoint, firstValue), (secondPoint, secondValue)) ->
@@ -46,11 +46,9 @@ module Solver =
                     Error PossibleDiscontinuity
 
     let findSolutions config functionToSolve interval =
-        let limits = Interval.limits interval
-        let accuracy = Config.accuracy config
-        let resolution = Config.resolution config
-
-        findRegions resolution functionToSolve limits
+        interval
+        |> Interval.points (Config.resolution config)
+        |> findRegions functionToSolve
         |> Seq.toList
-        |> List.traverseResultM (findRoot accuracy functionToSolve)
+        |> List.traverseResultM (findRoot (Config.accuracy config) functionToSolve)
         |> Result.map (List.distinct >> Seq.ofList)

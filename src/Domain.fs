@@ -43,7 +43,8 @@ module Interval =
         else
             Ok(Interval(lower, upper))
 
-    let internal limits (Interval(lower, upper)) = lower, upper
+    let internal points resolution (Interval(lower, upper)) =
+        seq { lower..resolution..upper }
 
     let internal partition count (Interval(lower, upper)) =
         let width = (upper - lower) / double count

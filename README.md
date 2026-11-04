@@ -25,20 +25,21 @@ let config = {
     Resolution = 1e-5
 }
 
-let solutions =
-    (-1.0, 1.0)
-    |> findSolutions config
-
-solutions
-|> Seq.iter (printfn "%.15f")
+match findSolutions config (-1.0, 1.0) with
+| Ok solutions ->
+    solutions
+    |> Seq.iter (printfn "%.15f")
+| Error DidNotConverge ->
+    printfn "The requested accuracy could not be reached."
+| Error PossibleDiscontinuity ->
+    printfn "A root could not be isolated."
 ```
 
 Use the parallel solver for larger intervals or expensive functions:
 
 ```fsharp
-let solutions =
-    (-1.0, 1.0)
-    |> EquationSolver.Parallel.findSolutions config
+let result =
+    EquationSolver.Parallel.findSolutions config (-1.0, 1.0)
 ```
 
 ## Configuration
@@ -60,7 +61,7 @@ upper limit.
 - Roots where the function only touches zero without changing sign are found
   only when the sampling sequence evaluates the root exactly.
 - The bisection method assumes continuity within each detected root region.
-  A discontinuity may produce an `InvalidOperationException`.
+  `findSolutions` reports `DidNotConverge` or `PossibleDiscontinuity`.
 - Samples that evaluate to `NaN` do not create root regions.
 
 ## Testing

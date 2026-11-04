@@ -1,8 +1,13 @@
 ﻿namespace EquationSolver
 
 open System
+open FsToolkit.ErrorHandling
 
 module Solver =
+    type SolveError =
+        | DidNotConverge
+        | PossibleDiscontinuity
+
     let private isDifferentSign first second =
         not (Double.IsNaN first || Double.IsNaN second)
         && Math.Sign first <> Math.Sign second
@@ -22,26 +27,23 @@ module Solver =
     [<TailCall>]
     let rec private findRoot accuracy functionToSolve (lowerLimit, lowerValue, upperLimit, upperValue) =
         if abs lowerValue < accuracy then
-            lowerLimit
+            Ok lowerLimit
         elif abs upperValue < accuracy then
-            upperLimit
+            Ok upperLimit
         else
             let middle = midpoint lowerLimit upperLimit
 
             if lowerLimit = middle || upperLimit = middle then
-                invalidOp "Unable to converge within the requested accuracy."
+                Error DidNotConverge
+            else
+                let middleValue = functionToSolve middle
 
-            let middleValue = functionToSolve middle
-
-            let nextRegion =
                 if isDifferentSign lowerValue middleValue then
-                    lowerLimit, lowerValue, middle, middleValue
+                    findRoot accuracy functionToSolve (lowerLimit, lowerValue, middle, middleValue)
                 elif isDifferentSign upperValue middleValue then
-                    middle, middleValue, upperLimit, upperValue
+                    findRoot accuracy functionToSolve (middle, middleValue, upperLimit, upperValue)
                 else
-                    invalidOp "Unable to isolate a root. The function may be discontinuous within the interval."
-
-            findRoot accuracy functionToSolve nextRegion
+                    Error PossibleDiscontinuity
 
     type Config = {
         Function: double -> double
@@ -67,5 +69,6 @@ module Solver =
 
         limits
         |> findRegions config.Resolution config.Function
-        |> Seq.map (findRoot config.Accuracy config.Function)
-        |> Seq.distinct
+        |> Seq.toList
+        |> List.traverseResultM (findRoot config.Accuracy config.Function)
+        |> Result.map (List.distinct >> Seq.ofList)

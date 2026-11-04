@@ -1,6 +1,7 @@
 ﻿namespace EquationSolver
 
 open System
+open FsToolkit.ErrorHandling
 
 module Parallel =
     let private partitionLimits (lowerLimit, upperLimit) partitionCount =
@@ -20,5 +21,7 @@ module Parallel =
         Solver.validate config limits
 
         partitionLimits limits Environment.ProcessorCount
-        |> Array.Parallel.collect (Solver.findSolutions config >> Seq.toArray)
-        |> Seq.distinct
+        |> Array.Parallel.map (Solver.findSolutions config)
+        |> Array.toList
+        |> List.sequenceResultM
+        |> Result.map (Seq.concat >> Seq.distinct)

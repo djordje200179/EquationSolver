@@ -44,4 +44,9 @@ module Interval =
             Ok(Interval(lower, upper))
 
     let internal points resolution (Interval(lower, upper)) =
-        seq { lower..resolution..upper }
+        seq {
+            yield!
+                seq { lower..resolution..upper }
+                |> Seq.takeWhile (fun point -> point < upper)
+            yield upper
+        }

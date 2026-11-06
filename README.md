@@ -65,6 +65,8 @@ upper limit.
 ## Behavior and limitations
 
 - Both solvers return solutions as a sorted list without exact duplicates.
+- Sampling includes both interval boundaries, with a shorter final step when
+  needed.
 - Both solvers sample sequentially. The parallel solver evaluates the function
   concurrently during root refinement, so the function must be thread-safe.
   For a pure function, both solvers return the same results.

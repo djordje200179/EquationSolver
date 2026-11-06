@@ -1,86 +1,46 @@
 # EquationSolver
 
-EquationSolver is a small F# library for finding the real roots of a
-single-variable function over a finite interval.
-
-The solver first samples the interval to locate regions where the function
-changes sign, then applies the bisection method to approximate each root.
-Both solvers use the same sampling grid. The parallel solver refines detected
-root regions across available processors.
+An F# library for finding real roots within a finite interval using sampling
+and bisection. Supports sequential and parallel solving.
 
 ## Requirements
 
-- .NET 10 SDK
-- F# 10
+.NET 10 SDK (F# 10).
 
 ## Usage
 
 ```fsharp
-open System
 open EquationSolver
-open EquationSolver.Solver
 
-match Config.create 1e-10 1e-5 with
-| Error (InvalidAccuracy value) ->
-    printfn "Invalid accuracy: %g" value
-| Error (InvalidResolution value) ->
-    printfn "Invalid resolution: %g" value
-| Ok config ->
-    match Interval.create -1.0 1.0 with
-    | Error (NonFiniteLimit value) ->
-        printfn "Invalid limit: %g" value
-    | Error (InvalidOrder (lower, upper)) ->
-        printfn "Invalid interval: %g to %g" lower upper
-    | Ok interval ->
-        match findSolutions config (fun x -> sin (1.0 / x)) interval with
-        | Ok solutions ->
-            solutions
-            |> List.iter (printfn "%.15f")
-        | Error DidNotConverge ->
-            printfn "The requested accuracy could not be reached."
-        | Error PossibleDiscontinuity ->
-            printfn "A root could not be isolated."
+match Config.create 1e-10 1e-3, Interval.create -2.0 2.0 with
+| Ok config, Ok interval ->
+    match Solver.findSolutions config (fun x -> x * x - 1.0) interval with
+    | Ok roots -> roots |> List.iter (printfn "%.10f")
+    | Error error -> printfn "Solver error: %A" error
+| Error error, _ -> printfn "Invalid configuration: %A" error
+| _, Error error -> printfn "Invalid interval: %A" error
 ```
 
-Use the parallel solver when refining many root regions or expensive functions:
-
-```fsharp
-let result =
-    EquationSolver.Parallel.findSolutions config sin interval
-```
+Use `Parallel.findSolutions` with the same arguments for parallel solving.
+The supplied function must be thread-safe.
 
 ## Configuration
 
 | Property | Description |
 | --- | --- |
-| `Accuracy` | Maximum accepted function-value error at a root. Must be positive and finite. |
-| `Resolution` | Distance between samples used to locate root regions. Must be positive and finite. |
+| `Accuracy` | Function-value tolerance, not root-position tolerance. |
+| `Resolution` | Sampling step used to locate root regions. |
 
-`Config.create` validates these values and returns `Result<Config, ConfigError>`.
-The resulting configuration can be reused with multiple functions.
-
-`Interval.create` requires finite limits with the lower limit less than the
-upper limit.
+Both values must be positive and finite. Interval limits must be finite and
+strictly increasing. Both constructors return `Result`.
 
 ## Behavior and limitations
 
-- Both solvers return solutions as a sorted list without exact duplicates.
-- Sampling includes both interval boundaries, with a shorter final step when
-  needed.
-- Both solvers sample sequentially. The parallel solver evaluates the function
-  concurrently during root refinement, so the function must be thread-safe.
-  For a pure function, both solvers return the same results.
-- `Resolution` determines which root regions can be detected. Roots closer
-  together than the selected resolution may be missed.
-- Roots where the function only touches zero without changing sign are found
-  only when the sampling sequence evaluates the root exactly.
-- The bisection method assumes continuity within each detected root region.
-  `findSolutions` reports `DidNotConverge` or `PossibleDiscontinuity`.
-- Samples that evaluate to `NaN` do not create root regions.
+- Returns a sorted list of roots without exact duplicates, or a solver error.
+- Sampling can miss closely spaced roots; tangent roots must be sampled exactly.
+- Bisection assumes continuity. `NaN` samples do not form root brackets.
 
 ## Testing
-
-Run the test suite from the repository root:
 
 ```powershell
 dotnet test EquationSolver.sln

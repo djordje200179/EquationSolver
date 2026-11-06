@@ -45,16 +45,3 @@ module Interval =
 
     let internal points resolution (Interval(lower, upper)) =
         seq { lower..resolution..upper }
-
-    let internal partition count (Interval(lower, upper)) =
-        let width = (upper - lower) / double count
-
-        Array.init count (fun index ->
-            let partitionLower = lower + double index * width
-            let partitionUpper =
-                if index = count - 1 then
-                    upper
-                else
-                    partitionLower + width
-
-            Interval(partitionLower, partitionUpper))

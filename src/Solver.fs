@@ -14,8 +14,9 @@ module Solver =
 
     let private midpoint lower upper = Math.ScaleB(lower + upper, -1)
 
-    let private findRegions functionToSolve points =
-        points
+    let internal findRegions config functionToSolve interval =
+        interval
+        |> Interval.points (Config.resolution config)
         |> Seq.map (fun point -> point, functionToSolve point)
         |> Seq.pairwise
         |> Seq.choose (fun ((firstPoint, firstValue), (secondPoint, secondValue)) ->
@@ -25,7 +26,7 @@ module Solver =
                 None)
 
     [<TailCall>]
-    let rec private findRoot accuracy functionToSolve (lowerLimit, lowerValue, upperLimit, upperValue) =
+    let rec internal findRoot accuracy functionToSolve (lowerLimit, lowerValue, upperLimit, upperValue) =
         if abs lowerValue < accuracy then
             Ok lowerLimit
         elif abs upperValue < accuracy then
@@ -47,8 +48,7 @@ module Solver =
 
     let findSolutions config functionToSolve interval =
         interval
-        |> Interval.points (Config.resolution config)
-        |> findRegions functionToSolve
+        |> findRegions config functionToSolve
         |> Seq.toList
         |> List.traverseResultM (findRoot (Config.accuracy config) functionToSolve)
         |> Result.map List.distinct

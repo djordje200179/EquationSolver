@@ -5,8 +5,8 @@ single-variable function over a finite interval.
 
 The solver first samples the interval to locate regions where the function
 changes sign, then applies the bisection method to approximate each root.
-Intervals can be processed sequentially or partitioned across available
-processors.
+Both solvers use the same sampling grid. The parallel solver refines detected
+root regions across available processors.
 
 ## Requirements
 
@@ -42,7 +42,7 @@ match Config.create 1e-10 1e-5 with
             printfn "A root could not be isolated."
 ```
 
-Use the parallel solver for larger intervals or expensive functions:
+Use the parallel solver when refining many root regions or expensive functions:
 
 ```fsharp
 let result =
@@ -65,6 +65,9 @@ upper limit.
 ## Behavior and limitations
 
 - Both solvers return solutions as a sorted list without exact duplicates.
+- Both solvers sample sequentially. The parallel solver evaluates the function
+  concurrently during root refinement, so the function must be thread-safe.
+  For a pure function, both solvers return the same results.
 - `Resolution` determines which root regions can be detected. Roots closer
   together than the selected resolution may be missed.
 - Roots where the function only touches zero without changing sign are found

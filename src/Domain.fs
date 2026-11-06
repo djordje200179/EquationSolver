@@ -3,12 +3,12 @@ namespace EquationSolver
 open System
 
 type ConfigError =
-    | InvalidAccuracy of double
-    | InvalidResolution of double
+    | InvalidAccuracy of float
+    | InvalidResolution of float
 
 type Config = private {
-    Accuracy: double
-    Resolution: double
+    Accuracy: float
+    Resolution: float
 }
 
 module Config =
@@ -27,10 +27,10 @@ module Config =
     let internal resolution config = config.Resolution
 
 type IntervalError =
-    | NonFiniteLimit of double
-    | InvalidOrder of lower: double * upper: double
+    | NonFiniteLimit of float
+    | InvalidOrder of lower: float * upper: float
 
-type Interval = private Interval of lower: double * upper: double
+type Interval = private Interval of lower: float * upper: float
 
 module Interval =
     let create lower upper =

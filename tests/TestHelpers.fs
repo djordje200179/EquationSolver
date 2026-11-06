@@ -31,11 +31,11 @@ let expectOk result =
     | Ok value -> value
     | Error error -> failwithf "Expected Ok, but got Error %A." error
 
-let assertSolutions (expected: double array) (actual: double array) =
+let assertSolutions (expected: float array) (actual: float array) =
     Assert.Equal(Array.length expected, Array.length actual)
 
     Array.iter2
-        (fun (expectedSolution: double) (actualSolution: double) ->
+        (fun (expectedSolution: float) (actualSolution: float) ->
             Assert.Equal(expectedSolution, actualSolution, 9))
         expected
         actual

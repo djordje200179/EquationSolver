@@ -51,4 +51,4 @@ module Solver =
         |> findRegions functionToSolve
         |> Seq.toList
         |> List.traverseResultM (findRoot (Config.accuracy config) functionToSolve)
-        |> Result.map (List.distinct >> Seq.ofList)
+        |> Result.map List.distinct

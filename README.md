@@ -35,7 +35,7 @@ match Config.create 1e-10 1e-5 with
         match findSolutions config (fun x -> sin (1.0 / x)) interval with
         | Ok solutions ->
             solutions
-            |> Seq.iter (printfn "%.15f")
+            |> List.iter (printfn "%.15f")
         | Error DidNotConverge ->
             printfn "The requested accuracy could not be reached."
         | Error PossibleDiscontinuity ->
@@ -64,7 +64,7 @@ upper limit.
 
 ## Behavior and limitations
 
-- Solutions are returned in ascending order without exact duplicates.
+- Both solvers return solutions as a sorted list without exact duplicates.
 - `Resolution` determines which root regions can be detected. Roots closer
   together than the selected resolution may be missed.
 - Roots where the function only touches zero without changing sign are found

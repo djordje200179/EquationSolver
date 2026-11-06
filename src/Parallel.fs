@@ -10,4 +10,4 @@ module Parallel =
         |> Array.Parallel.map (Solver.findSolutions config functionToSolve)
         |> Array.toList
         |> List.sequenceResultM
-        |> Result.map (Seq.concat >> Seq.distinct)
+        |> Result.map (List.concat >> List.distinct)

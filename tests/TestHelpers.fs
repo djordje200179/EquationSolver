@@ -18,13 +18,13 @@ let solveSequentially functionToSolve limits =
     limits
     |> interval
     |> Solver.findSolutions validConfig functionToSolve
-    |> Result.map Seq.toArray
+    |> Result.map List.toArray
 
 let solveInParallel functionToSolve limits =
     limits
     |> interval
     |> Parallel.findSolutions validConfig functionToSolve
-    |> Result.map Seq.toArray
+    |> Result.map List.toArray
 
 let expectOk result =
     match result with

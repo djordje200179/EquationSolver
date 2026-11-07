@@ -8,6 +8,13 @@ module Solver =
         | DidNotConverge
         | PossibleDiscontinuity
 
+    type internal Bracket = {
+        LowerLimit: float
+        LowerValue: float
+        UpperLimit: float
+        UpperValue: float
+    }
+
     let private isDifferentSign first second =
         not (Double.IsNaN first || Double.IsNaN second)
         && Math.Sign first <> Math.Sign second
@@ -21,28 +28,41 @@ module Solver =
         |> Seq.pairwise
         |> Seq.choose (fun ((firstPoint, firstValue), (secondPoint, secondValue)) ->
             if firstValue = 0.0 || secondValue = 0.0 || isDifferentSign firstValue secondValue then
-                Some(firstPoint, firstValue, secondPoint, secondValue)
+                Some {
+                    LowerLimit = firstPoint
+                    LowerValue = firstValue
+                    UpperLimit = secondPoint
+                    UpperValue = secondValue
+                }
             else
                 None)
 
     [<TailCall>]
-    let rec internal findRoot accuracy functionToSolve (lowerLimit, lowerValue, upperLimit, upperValue) =
-        if abs lowerValue < accuracy then
-            Ok lowerLimit
-        elif abs upperValue < accuracy then
-            Ok upperLimit
+    let rec internal findRoot accuracy functionToSolve bracket =
+        if abs bracket.LowerValue < accuracy then
+            Ok bracket.LowerLimit
+        elif abs bracket.UpperValue < accuracy then
+            Ok bracket.UpperLimit
         else
-            let middle = midpoint lowerLimit upperLimit
+            let middle = midpoint bracket.LowerLimit bracket.UpperLimit
 
-            if lowerLimit = middle || upperLimit = middle then
+            if bracket.LowerLimit = middle || bracket.UpperLimit = middle then
                 Error DidNotConverge
             else
                 let middleValue = functionToSolve middle
 
-                if isDifferentSign lowerValue middleValue then
-                    findRoot accuracy functionToSolve (lowerLimit, lowerValue, middle, middleValue)
-                elif isDifferentSign upperValue middleValue then
-                    findRoot accuracy functionToSolve (middle, middleValue, upperLimit, upperValue)
+                if isDifferentSign bracket.LowerValue middleValue then
+                    findRoot accuracy functionToSolve {
+                        bracket with
+                            UpperLimit = middle
+                            UpperValue = middleValue
+                    }
+                elif isDifferentSign bracket.UpperValue middleValue then
+                    findRoot accuracy functionToSolve {
+                        bracket with
+                            LowerLimit = middle
+                            LowerValue = middleValue
+                    }
                 else
                     Error PossibleDiscontinuity
 

@@ -8,61 +8,40 @@ module Solver =
         | DidNotConverge
         | PossibleDiscontinuity
 
-    type internal Bracket = {
-        LowerLimit: float
-        LowerValue: float
-        UpperLimit: float
-        UpperValue: float
-    }
-
-    let private isDifferentSign first second =
-        not (Double.IsNaN first || Double.IsNaN second)
-        && Math.Sign first <> Math.Sign second
-
-    let private midpoint lower upper = Math.ScaleB(lower + upper, -1)
-
     let internal findRegions config functionToSolve interval =
         interval
         |> Interval.points (Config.resolution config)
-        |> Seq.map (fun point -> point, functionToSolve point)
+        |> Seq.map (fun point -> {
+            Point = point
+            Value = functionToSolve point
+        })
         |> Seq.pairwise
-        |> Seq.choose (fun ((firstPoint, firstValue), (secondPoint, secondValue)) ->
-            if firstValue = 0.0 || secondValue = 0.0 || isDifferentSign firstValue secondValue then
-                Some {
-                    LowerLimit = firstPoint
-                    LowerValue = firstValue
-                    UpperLimit = secondPoint
-                    UpperValue = secondValue
-                }
-            else
-                None)
+        |> Seq.filter (fun (lower, upper) ->
+            lower.Value = 0.0
+            || upper.Value = 0.0
+            || Sample.hasDifferentSign lower upper)
 
     [<TailCall>]
-    let rec internal findRoot accuracy functionToSolve bracket =
-        if abs bracket.LowerValue < accuracy then
-            Ok bracket.LowerLimit
-        elif abs bracket.UpperValue < accuracy then
-            Ok bracket.UpperLimit
+    let rec internal findRoot accuracy functionToSolve (lower, upper) =
+        if abs lower.Value < accuracy then
+            Ok lower.Point
+        elif abs upper.Value < accuracy then
+            Ok upper.Point
         else
-            let middle = midpoint bracket.LowerLimit bracket.UpperLimit
+            let middlePoint = Sample.midpoint lower upper
 
-            if bracket.LowerLimit = middle || bracket.UpperLimit = middle then
+            if lower.Point = middlePoint || upper.Point = middlePoint then
                 Error DidNotConverge
             else
-                let middleValue = functionToSolve middle
+                let middle = {
+                    Point = middlePoint
+                    Value = functionToSolve middlePoint
+                }
 
-                if isDifferentSign bracket.LowerValue middleValue then
-                    findRoot accuracy functionToSolve {
-                        bracket with
-                            UpperLimit = middle
-                            UpperValue = middleValue
-                    }
-                elif isDifferentSign bracket.UpperValue middleValue then
-                    findRoot accuracy functionToSolve {
-                        bracket with
-                            LowerLimit = middle
-                            LowerValue = middleValue
-                    }
+                if Sample.hasDifferentSign lower middle then
+                    findRoot accuracy functionToSolve (lower, middle)
+                elif Sample.hasDifferentSign upper middle then
+                    findRoot accuracy functionToSolve (middle, upper)
                 else
                     Error PossibleDiscontinuity
 

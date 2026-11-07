@@ -7,8 +7,13 @@
 
   <ItemGroup>
     <Compile Include="Domain.fs" />
+    <Compile Include="Sample.fs" />
     <Compile Include="Solver.fs" />
     <Compile Include="Parallel.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="EquationSolver.Tests" />
   </ItemGroup>
 
   <ItemGroup>

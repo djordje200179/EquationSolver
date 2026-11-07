@@ -10,12 +10,32 @@ open Xunit
 [<InlineData(-4.0, -2.0, -3.0)>]
 [<InlineData(-2.0, 2.0, 0.0)>]
 [<InlineData(3.0, 3.0, 3.0)>]
-let ``midpoint depends on coordinates and is symmetric`` firstPoint secondPoint expected =
+let ``midpoint has its expected coordinate`` firstPoint secondPoint expected =
     let first = { Point = firstPoint; Value = Double.NaN }
     let second = { Point = secondPoint; Value = Double.PositiveInfinity }
 
     Assert.Equal(expected, Sample.midpoint first second)
-    Assert.Equal(expected, Sample.midpoint second first)
+
+[<Property>]
+let ``midpoint is symmetric for generated coordinates`` firstPoint secondPoint =
+    let first = { Point = firstPoint; Value = 0.0 }
+    let second = { Point = secondPoint; Value = 0.0 }
+
+    let forward = Sample.midpoint first second
+    let backward = Sample.midpoint second first
+    forward.Equals backward
+
+[<Property>]
+let ``midpoint ignores generated values`` firstPoint secondPoint firstValue secondValue =
+    let first = { Point = firstPoint; Value = 0.0 }
+    let second = { Point = secondPoint; Value = 0.0 }
+
+    let original = Sample.midpoint first second
+    let changed =
+        Sample.midpoint
+            { first with Value = firstValue }
+            { second with Value = secondValue }
+    original.Equals changed
 
 [<Theory>]
 [<InlineData(-1.0, 1.0)>]

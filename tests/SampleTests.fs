@@ -2,6 +2,7 @@ module EquationSolver.SampleTests
 
 open System
 open EquationSolver
+open FsCheck.Xunit
 open Xunit
 
 [<Theory>]
@@ -25,12 +26,11 @@ let ``midpoint depends on coordinates and is symmetric`` firstPoint secondPoint 
 [<InlineData(Double.NegativeInfinity, 1.0)>]
 [<InlineData(0.0, Double.PositiveInfinity)>]
 [<InlineData(0.0, Double.NegativeInfinity)>]
-let ``different signs return true regardless of order`` firstValue secondValue =
+let ``different signs return true`` firstValue secondValue =
     let first = { Point = -2.0; Value = firstValue }
     let second = { Point = 3.0; Value = secondValue }
 
     Assert.True(Sample.hasDifferentSign first second)
-    Assert.True(Sample.hasDifferentSign second first)
 
 [<Theory>]
 [<InlineData(1.0, 2.0)>]
@@ -47,23 +47,29 @@ let ``different signs return true regardless of order`` firstValue secondValue =
 [<InlineData(Double.NegativeInfinity, -1.0)>]
 [<InlineData(Double.PositiveInfinity, Double.PositiveInfinity)>]
 [<InlineData(Double.NegativeInfinity, Double.NegativeInfinity)>]
-let ``matching signs or NaN return false regardless of order`` firstValue secondValue =
+let ``matching signs or NaN return false`` firstValue secondValue =
     let first = { Point = -2.0; Value = firstValue }
     let second = { Point = 3.0; Value = secondValue }
 
     Assert.False(Sample.hasDifferentSign first second)
-    Assert.False(Sample.hasDifferentSign second first)
 
-[<Theory>]
-[<InlineData(-1.0, 1.0)>]
-[<InlineData(1.0, 2.0)>]
-let ``sign comparison is independent of point coordinates`` firstValue secondValue =
+[<Property>]
+let ``sign comparison is symmetric for generated values`` firstValue secondValue =
     let first = { Point = -2.0; Value = firstValue }
     let second = { Point = 3.0; Value = secondValue }
 
-    Assert.Equal(
-        Sample.hasDifferentSign first second,
+    let forward = Sample.hasDifferentSign first second
+    let backward = Sample.hasDifferentSign second first
+    forward = backward
+
+[<Property>]
+let ``sign comparison ignores generated coordinates`` firstValue secondValue firstPoint secondPoint =
+    let first = { Point = -2.0; Value = firstValue }
+    let second = { Point = 3.0; Value = secondValue }
+
+    let original = Sample.hasDifferentSign first second
+    let moved =
         Sample.hasDifferentSign
-            { first with Point = 100.0 }
-            { second with Point = -100.0 }
-    )
+            { first with Point = firstPoint }
+            { second with Point = secondPoint }
+    original = moved

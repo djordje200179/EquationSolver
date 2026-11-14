@@ -5,7 +5,7 @@ and bisection. Supports sequential and parallel solving.
 
 ## Requirements
 
-.NET 10 SDK (F# 10).
+.NET 11 SDK (F# 11).
 
 ## Usage
 

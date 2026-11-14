@@ -73,7 +73,7 @@ let tests =
 
         testList "Sampling" [
             for resolution in [ 0.125; 0.3; 2.0 ] do
-                testCase (sprintf "Resolution %g uses the same points as sequential solver" resolution) (fun () ->
+                testCase $"Resolution {resolution} uses the same points as sequential solver" (fun () ->
                     let settings = config validAccuracy resolution
                     let searchInterval = interval (0.0, 1.0)
                     let sequentialPoints = ConcurrentBag<float>()

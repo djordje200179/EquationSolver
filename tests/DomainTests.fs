@@ -16,7 +16,7 @@ let tests =
                 Double.PositiveInfinity
                 Double.NegativeInfinity
             ] do
-                testCase (sprintf "%g" value) (fun () ->
+                testCase (string value) (fun () ->
                     let error = Expect.wantError (Config.create value validResolution) "Expected invalid accuracy"
                     let actual = Expect.wantCase error <@ InvalidAccuracy @> "Expected InvalidAccuracy"
                     Expect.isTrue (actual.Equals value) "Expected original invalid accuracy")
@@ -30,7 +30,7 @@ let tests =
                 Double.PositiveInfinity
                 Double.NegativeInfinity
             ] do
-                testCase (sprintf "%g" value) (fun () ->
+                testCase (string value) (fun () ->
                     let error = Expect.wantError (Config.create validAccuracy value) "Expected invalid resolution"
                     let actual = Expect.wantCase error <@ InvalidResolution @> "Expected InvalidResolution"
                     Expect.isTrue (actual.Equals value) "Expected original invalid resolution")
@@ -43,7 +43,7 @@ let tests =
                 Double.NegativeInfinity, 1.0
                 0.0, Double.PositiveInfinity
             ] do
-                testCase (sprintf "%g to %g" lower upper) (fun () ->
+                testCase $"{lower} to {upper}" (fun () ->
                     let error = Expect.wantError (Interval.create lower upper) "Expected nonfinite limit"
                     let value = Expect.wantCase error <@ NonFiniteLimit @> "Expected NonFiniteLimit"
                     Expect.isTrue (Double.IsNaN value || Double.IsInfinity value) "Expected nonfinite value")
@@ -51,7 +51,7 @@ let tests =
 
         testList "Invalid order" [
             for lower, upper in [ 1.0, 1.0; 2.0, 1.0 ] do
-                testCase (sprintf "%g to %g" lower upper) (fun () ->
+                testCase $"{lower} to {upper}" (fun () ->
                     Expect.equal
                         (Interval.create lower upper)
                         (Error(InvalidOrder(lower, upper)))

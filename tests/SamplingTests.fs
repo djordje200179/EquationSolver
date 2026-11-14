@@ -19,7 +19,7 @@ let tests =
                     2.0, 0.0
                     2.0, 1.0
                 ] do
-                    testCase (sprintf "Resolution %g finds root %g" resolution root) (fun () ->
+                    testCase $"Resolution {resolution} finds root {root}" (fun () ->
                         let solutions =
                             Expect.wantOk
                                 (solve (config validAccuracy resolution) (fun x -> x - root) (interval (0.0, 1.0)))
@@ -32,7 +32,7 @@ let tests =
                     0.3, [ 0.0; 0.3; 0.6; 0.9; 1.0 ]
                     2.0, [ 0.0; 1.0 ]
                 ] do
-                    testCase (sprintf "Resolution %g samples both boundaries once" resolution) (fun () ->
+                    testCase $"Resolution {resolution} samples both boundaries once" (fun () ->
                         let samples = ResizeArray<float>()
                         let recordSample point =
                             samples.Add point

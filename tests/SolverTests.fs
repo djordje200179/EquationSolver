@@ -22,7 +22,7 @@ let tests =
                 2.0, -4.0, 0.0, 4.0
                 -0.5, -1.5, -5.0, 0.0
             ] do
-                testCase (sprintf "Linear function %gx + %g" slope intercept) (fun () ->
+                testCase $"Linear function {slope}x + {intercept}" (fun () ->
                     let solutions =
                         Expect.wantOk
                             (findSolutions validConfig (fun x -> slope * x + intercept) (interval (lower, upper)))
@@ -31,7 +31,7 @@ let tests =
                     assertSolutions [ -intercept / slope ] solutions)
 
             for lower, upper in [ -2.0, 2.0; -1.0, 2.0; -2.0, 1.0 ] do
-                testCase (sprintf "Quadratic roots within %g to %g" lower upper) (fun () ->
+                testCase $"Quadratic roots within {lower} to {upper}" (fun () ->
                     let solutions =
                         Expect.wantOk
                             (findSolutions validConfig (fun x -> x * x - 1.0) (interval (lower, upper)))

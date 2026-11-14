@@ -14,7 +14,7 @@ let tests =
                 -2.0, 2.0, 0.0
                 3.0, 3.0, 3.0
             ] do
-                testCase (sprintf "%g and %g" firstPoint secondPoint) (fun () ->
+                testCase $"{firstPoint} and {secondPoint}" (fun () ->
                     let first = { Point = firstPoint; Value = Double.NaN }
                     let second = { Point = secondPoint; Value = Double.PositiveInfinity }
 
@@ -51,7 +51,7 @@ let tests =
                 0.0, Double.PositiveInfinity
                 0.0, Double.NegativeInfinity
             ] do
-                testCase (sprintf "%g and %g" firstValue secondValue) (fun () ->
+                testCase $"{firstValue} and {secondValue}" (fun () ->
                     let first = { Point = -2.0; Value = firstValue }
                     let second = { Point = 3.0; Value = secondValue }
 
@@ -75,7 +75,7 @@ let tests =
                 Double.PositiveInfinity, Double.PositiveInfinity
                 Double.NegativeInfinity, Double.NegativeInfinity
             ] do
-                testCase (sprintf "%g and %g" firstValue secondValue) (fun () ->
+                testCase $"{firstValue} and {secondValue}" (fun () ->
                     let first = { Point = -2.0; Value = firstValue }
                     let second = { Point = 3.0; Value = secondValue }
 

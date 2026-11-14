@@ -1,41 +1,22 @@
 module EquationSolver.TestHelpers
 
 open EquationSolver
-open Xunit
+open Expecto
 
 let validAccuracy = 1e-10
 let validResolution = 1e-3
 
-let validConfig =
-    Config.create validAccuracy validResolution
-    |> Result.defaultWith (failwithf "Invalid test configuration: %A")
+let config accuracy resolution =
+    Expect.wantOk (Config.create accuracy resolution) "Expected valid test configuration"
+
+let validConfig = config validAccuracy validResolution
 
 let interval (lower, upper) =
-    Interval.create lower upper
-    |> Result.defaultWith (failwithf "Invalid test interval: %A")
+    Expect.wantOk (Interval.create lower upper) "Expected valid test interval"
 
-let solveSequentially functionToSolve limits =
-    limits
-    |> interval
-    |> Solver.findSolutions validConfig functionToSolve
-    |> Result.map List.toArray
+let assertSolutions expected actual =
+    Expect.hasLength actual (List.length expected) "Expected root count"
 
-let solveInParallel functionToSolve limits =
-    limits
-    |> interval
-    |> Parallel.findSolutions validConfig functionToSolve
-    |> Result.map List.toArray
-
-let expectOk result =
-    match result with
-    | Ok value -> value
-    | Error error -> failwithf "Expected Ok, but got Error %A." error
-
-let assertSolutions (expected: float array) (actual: float array) =
-    Assert.Equal(Array.length expected, Array.length actual)
-
-    Array.iter2
-        (fun (expectedSolution: float) (actualSolution: float) ->
-            Assert.Equal(expectedSolution, actualSolution, 9))
-        expected
-        actual
+    (expected, actual)
+    ||> List.iter2 (fun expectedRoot actualRoot ->
+        Expect.floatClose { absolute = 1e-9; relative = 0.0 } actualRoot expectedRoot "Expected root")

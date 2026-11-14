@@ -1,28 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <LangVersion>10.0</LangVersion>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="TestHelpers.fs" />
     <Compile Include="DomainTests.fs" />
     <Compile Include="SampleTests.fs" />
+    <Compile Include="SamplingTests.fs" />
     <Compile Include="SolverTests.fs" />
     <Compile Include="ParallelTests.fs" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="10.0.1" />
-    <PackageReference Include="FsCheck.Xunit.v3" Version="3.3.4" />
+    <PackageReference Include="Expecto.FsCheck" Version="11.1.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.8.1" />
-    <PackageReference Include="xunit.v3" Version="3.2.2" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
+    <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.16.1" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\src\EquationSolver.fsproj" />
   </ItemGroup>
-
 </Project>
